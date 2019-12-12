@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "ast.h"
 #include "code.h"
+
+int counter = 0;
 
 Atom* atom_integer(int v) {
 	Atom* a = (Atom*)malloc(sizeof(Atom));
@@ -23,7 +26,7 @@ Atom* atom_empty() {
 	return a;
 }
 
-Instr* instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
+Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
 	Instr* instr = (Instr*)malloc(sizeof(Instr));
 	instr->op.operator = operator;
 	instr->op.el1 = el1;
@@ -33,7 +36,7 @@ Instr* instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
 	return instr;
 }
 
-InstrList* instr_list(Instr* instr, InstrList* next) {
+InstrList* mk_instr_list(Instr* instr, InstrList* next) {
 	InstrList* list = (InstrList*)malloc(sizeof(InstrList));
 	list->instr = instr;
 	list->next = next;
@@ -75,7 +78,7 @@ void printAtom(Atom* ex) {
 
 void printInstrAux(Instr* instr) {
 	switch(instr->kind) {
-		case PLUS: case MINUS: case MULT: case DIV:
+		case I_PLUS: case I_MINUS: case I_MULT: case I_DIV:
 			printAtom(instr->op.el1);
 			printf(",");
 			printAtom(instr->op.el2);
@@ -84,7 +87,7 @@ void printInstrAux(Instr* instr) {
 			printf(",");
 			printAtom(instr->op.el4);
 			break;
-		case LABEL: case GOTO:
+		case I_LABEL: case I_GOTO:
 			printAtom(instr->op.el1);
 			printf(",");
 			printAtom(instr->op.el2);
@@ -93,7 +96,7 @@ void printInstrAux(Instr* instr) {
 			printf(",");
 			printAtom(instr->op.el4);
 			break;
-		case IFE: case IFDIF: case IFG: case IFL: case IFGE: case IFLE:
+		case I_IFE: case I_IFDIF: case I_IFG: case I_IFL: case I_IFGE: case I_IFLE:
 			printAtom(instr->op.el1);
 			printf(",");
 			printAtom(instr->op.el2);
@@ -106,43 +109,43 @@ void printInstrAux(Instr* instr) {
 void printInstr(Instr* instr) {
 	printf("(");
 	switch(instr->kind) {
-		case(PLUS):
+		case(I_PLUS):
 			printf("PLUS,");
 			break;
-		case(MINUS):
+		case(I_MINUS):
 			printf("MINUS,"); 
 			break;
-		case(MULT):
+		case(I_MULT):
 			printf("MULT,");
 			break;
-		case(DIV):
+		case(I_DIV):
 			printf("DIV,"); 
 			break;
-		case(ATRIB):
+		case(I_ATRIB):
 			printf("ATRIB,"); 
 			break;
-		case(LABEL):
+		case(I_LABEL):
 			printf("LABEL,"); 
 			break;
-		case(GOTO):
+		case(I_GOTO):
 			printf("GOTO,"); 
 			break;
-		case(IFE):
+		case(I_IFE):
 			printf("IFE,"); 
 			break;
-		case(IFDIF):
+		case(I_IFDIF):
 			printf("IFDIF,"); 
 			break;
-		case(IFG):
+		case(I_IFG):
 			printf("IFG,"); 
 			break;
-		case(IFL):
+		case(I_IFL):
 			printf("IFL,"); 
 			break;
-		case(IFGE):
+		case(I_IFGE):
 			printf("IFGE,"); 
 			break;
-		case(IFLE):
+		case(I_IFLE):
 			printf("IFLE,"); 
 			break;
 	}
@@ -151,38 +154,51 @@ void printInstr(Instr* instr) {
 	printf(")\n");
 }
 
-void printListInstr(InstrList* list) {
+void printInstrList(InstrList* list) {
 	printInstr(list->instr);
 	if(list->next != NULL) {
-		printListInstr(list->next);
+		printInstrList(list->next);
 	}
 }
 
 
-/*InstrList compileExpr(Expr e, char *r) {
-	//...
-	switch(e->kind)
-	{
-		case NUM:
-			code = mkInstrList(mkInstr(ATRIB, reg, e->value, Empty, Empty), NULL);
+char* newVar() {
+	char buffer[20];
+	sprintf(buffer,"t%d", counter);
+	counter++;
+	return strdup(buffer);
+}
+
+int compileOp(int op) {
+	
+}
+
+InstrList* compileExpr(Expr* expr, char* reg) {
+	switch(expr->kind) {
+		case E_INTEGER:
+			char* reg = newVar();
+			InstrList* code = (InstrList*)malloc(sizeof(InstrList));
+			code = mk_instr_list(mk_instr(ATRIB, reg, expr->attr.value, Empty, Empty), NULL);
 			return code;
-		break;
 
-		case VAR:
+		case E_VARIABLE:
+			char* reg = newVar();
+			InstrList* code = (InstrList*)malloc(sizeof(InstrList));
+			code = mk_instr_list(mk_instr(ATRIB, reg, expr->attr.value, Empty, Empty), NULL);
+			return code;
 
-		break;
-
-		case ExprOp:
-		r1 = newVar();
-		l1 = compileExpr(e->left, r1);
-		r2 = newVer();
-		l2 = compileExpr(e->right, r2);
-		l3 = append(l1, l2);
-		l4 = append(l3, mkInstrList(mkInstr(comp(e->op), r, r1, r2, Empty), NULL));
-
-		return l4;
+		case E_OPERATION:
+			char* reg1 = newVar();
+			char* reg2 = newVar();
+			InstrList* list1 = (InstrList*)malloc(sizeof(InstrList));
+			InstrList* list2 = (InstrList*)malloc(sizeof(InstrList));
+			l1 = compileExpr(expr->left, reg1);
+			l2 = compileExpr(expr->right, reg2);
+			l3 = append(l1, l2);
+			l4 = append(l3, mk_instr_list(mk_instr(compileOp(expr->op), reg, reg1, reg2, Empty), NULL));
+			return l4;
 	}
-}*/
+}
 
 int main() {
 	return 0;

@@ -13,7 +13,7 @@ struct _Atom {
 
 struct _Instr {
 	enum {
-		PLUS, MINUS, MULT, DIV, ATRIB, LABEL, GOTO, IFE, IFDIF, IFG, IFL, IFGE, IFLE
+		I_PLUS, I_MINUS, I_MULT, I_DIV, I_ATRIB, I_LABEL, I_GOTO, I_IFE, I_IFDIF, I_IFG, I_IFL, I_IFGE, I_IFLE
 	} kind;
 	struct {
 		int operator;
@@ -38,8 +38,8 @@ typedef struct _InstrList InstrList;
 Atom* atom_integer(int v);
 Atom* atom_variable(char* name);
 Atom* atom_empty();
-Instr* instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
-InstrList* instr_list(Instr* instr, InstrList* next);
+Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
+InstrList* mk_instr_list(Instr* instr, InstrList* next);
 
 
 Instr* getFirst(InstrList* list);
@@ -50,8 +50,9 @@ InstrList* append(InstrList* l1, InstrList* l2);
 void printAtom(Atom* ex);
 void printInstrAux(Instr* instr);
 void printInstr(Instr* instr);
-void printListInstr(InstrList* list);
+void printInstrList(InstrList* list);
 
-//InstrList compileExpr(Expr e, char *r);
+char* newVar();
+InstrList* compileExpr(Expr* e, char *r);
 
 #endif

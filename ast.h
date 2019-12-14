@@ -6,12 +6,12 @@
 struct _Expr {
   enum { 
     E_INTEGER,
-    //E_VARIABLE,
+    E_VARIABLE,
     E_OPERATION
   } kind;
   union {
     int value; // for integer values
-    //char* variable; //for char
+    char* variable; //for char
     struct { 
       int operator; // PLUS, MINUS, etc 
       struct _Expr* left;
@@ -20,7 +20,7 @@ struct _Expr {
   } attr;
 };
 
-/*struct _BoolExpr {
+struct _BoolExpr {
   enum {
     BOOLINT,
     EXPR
@@ -78,22 +78,22 @@ struct _Cmd {
 struct _CmdList {
   struct _Cmd* cmd;
   struct _CmdList* next;
-};*/
+};
 
 
 typedef struct _Expr Expr; // Convenience typedef
-/*typedef struct _BoolExpr BoolExpr;
+typedef struct _BoolExpr BoolExpr;
 typedef struct _Cmd Cmd;
 typedef struct _CmdList CmdList;
-typedef struct _AssignExpr AssignExpr;*/
+typedef struct _AssignExpr AssignExpr;
 
 
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
-//Expr* ast_variable(char* var);
+Expr* ast_variable(char* var);
 Expr* ast_operation(int operator, Expr* left, Expr* right);
 
-/*BoolExpr* bool_ast_integer(int v);
+BoolExpr* bool_ast_integer(int v);
 BoolExpr* bool_ast_expr(int operator, Expr* left, Expr* right);
 
 AssignExpr* ast_assign_expr(char* var, Expr* expr);
@@ -105,6 +105,6 @@ Cmd* ast_while_expr(BoolExpr* bexpr, CmdList* expr);
 Cmd* ast_print(char* str);
 Cmd* ast_read(char* var);
 
-CmdList* ast_list_cmd(Cmd* cmd, CmdList* next); */
+CmdList* ast_list_cmd(Cmd* cmd, CmdList* next); 
 
 #endif

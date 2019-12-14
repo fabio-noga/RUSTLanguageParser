@@ -17,7 +17,7 @@ int start(int argc, char** argv) {
 
   if (yyparse() == 0) {
     printf("fn main()\n");
-    printExpr(root,1);
+    printList(root,1);
   }  
 }
 

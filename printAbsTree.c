@@ -9,9 +9,9 @@ void printExpr(Expr* expr, int tabs){
 		case E_INTEGER:
 			printf("%d\n", expr->attr.value);
 			break;
-		/*case E_VARIABLE:
+		case E_VARIABLE:
 			printf("%s\n", expr->attr.variable);
-			break;*/
+			break;
 		case E_OPERATION:
 			switch(expr->attr.op.operator) {
 				case PLUS:
@@ -36,7 +36,7 @@ void printExpr(Expr* expr, int tabs){
 	}
 }
 
-/*void printBool(BoolExpr* bexpr, int tabs){
+void printBool(BoolExpr* bexpr, int tabs){
 	printTabs(tabs);
 	switch(bexpr->kind){
 		case BOOLINT:
@@ -121,8 +121,7 @@ void printList(CmdList* list, int tabs){
 	    printCmd(list->cmd, tabs);
 	    printList(list->next, tabs);
 	}
-}*/
-
+}
 void printTabs(int tabs) {
 	printf(" ");
 	for(int i=1; i<tabs; i++) {

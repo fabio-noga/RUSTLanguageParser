@@ -38,9 +38,14 @@
   FUNC
   MAIN
 
+  AND
+  OR
+
 // Operator associativity & precedence
 %left C SC
 %left ATRIB
+%left OR
+%left AND
 %left EQ DIFF
 %left IF ELSE WHILE
 %left LESS LEQ GREATER GEQ
@@ -58,22 +63,22 @@
   int intValue;
   char* charValue;
   Expr* exprValue;
-  //BoolExpr* boolexprValue;
-  //AssignExpr* assignValue;
-  //Cmd* cmdValue;
-  //CmdList* cmdList;
+  BoolExpr* boolexprValue;
+  AssignExpr* assignValue;
+  Cmd* cmdValue;
+  CmdList* cmdList;
 }
 
 %type <intValue> INT
-//%type <charValue> VAR
-//%type <charValue> STR
+%type <charValue> VAR
+%type <charValue> STR
 %type <exprValue> expr
-//%type <boolexprValue> boolexpr
-//%type <assignValue> assignexpr
-//%type <cmdValue> ifexpr
-//%type <cmdValue> whileexpr
-//%type <cmdValue> cmdexpr
-//%type <cmdList> cmdlist
+%type <boolexprValue> boolexpr
+%type <assignValue> assignexpr
+%type <cmdValue> ifexpr
+%type <cmdValue> whileexpr
+%type <cmdValue> cmdexpr
+%type <cmdList> cmdlist
 
 // Use "%code requires" to make declarations go
 // into both parser.c and parser.h
@@ -87,15 +92,15 @@ extern int yyline;
 extern char* yytext;
 extern FILE* yyin;
 extern void yyerror(const char* msg);
-Expr* root;
+CmdList* root;
 }
 
 %%
-program: FUNC MAIN PO PC BO expr BC { root = $6; }
+program: FUNC MAIN PO PC BO cmdlist BC { root = $6; }
 
 expr: 
   INT { $$ = ast_integer($1); }
-//  | VAR { $$ = ast_variable($1); }
+  | VAR { $$ = ast_variable($1); }
   | expr PLUS expr { $$ = ast_operation(PLUS, $1, $3); }
   | expr MINUS expr { $$ = ast_operation(MINUS, $1, $3); }
   | expr MULT expr { $$ = ast_operation(MULT, $1, $3); } 
@@ -103,42 +108,42 @@ expr:
   | expr MOD expr { $$ = ast_operation(MOD, $1, $3); }
   ;
 
-//boolexpr:
-//  INT { $$ = bool_ast_integer($1); }
-//  | expr EQ expr { $$ = bool_ast_expr(EQ, $1, $3); }
-//  | expr DIFF expr { $$ = bool_ast_expr(DIFF, $1, $3); }
-//  | expr LESS expr { $$ = bool_ast_expr(LESS, $1, $3); }
-//  | expr GREATER expr { $$ = bool_ast_expr(GREATER, $1, $3); }
-//  | expr LEQ expr { $$ = bool_ast_expr(LEQ, $1, $3); }
-//  | expr GEQ expr { $$ = bool_ast_expr(GEQ, $1, $3); }
-//  ;
+boolexpr:
+  INT { $$ = bool_ast_integer($1); }
+  | expr EQ expr { $$ = bool_ast_expr(EQ, $1, $3); }
+  | expr DIFF expr { $$ = bool_ast_expr(DIFF, $1, $3); }
+  | expr LESS expr { $$ = bool_ast_expr(LESS, $1, $3); }
+  | expr GREATER expr { $$ = bool_ast_expr(GREATER, $1, $3); }
+  | expr LEQ expr { $$ = bool_ast_expr(LEQ, $1, $3); }
+  | expr GEQ expr { $$ = bool_ast_expr(GEQ, $1, $3); }
+  ;
 
-//assignexpr:
-//  LET VAR ATRIB expr { $$ = ast_assign_expr($2, $4); }
-//  | VAR ATRIB expr { $$ = ast_assign_expr($1, $3); }
-//  ;
+assignexpr:
+  LET VAR ATRIB expr { $$ = ast_assign_expr($2, $4); }
+  | VAR ATRIB expr { $$ = ast_assign_expr($1, $3); }
+  ;
 
-//ifexpr:
-//  IF boolexpr BO cmdlist BC { $$ = ast_if_expr($2, $4); }
-//  | IF boolexpr BO cmdlist BC ELSE BO cmdlist BC { $$ = ast_ifelse_expr($2, $4, $8); }
-//  ;  
+ifexpr:
+  IF boolexpr BO cmdlist BC { $$ = ast_if_expr($2, $4); }
+  | IF boolexpr BO cmdlist BC ELSE BO cmdlist BC { $$ = ast_ifelse_expr($2, $4, $8); }
+  ;  
 
-//whileexpr:
-//  WHILE boolexpr BO cmdlist BC { $$ = ast_while_expr($2, $4); }
-//  ;
+whileexpr:
+  WHILE boolexpr BO cmdlist BC { $$ = ast_while_expr($2, $4); }
+  ;
 
-//cmdexpr: 
-//  assignexpr SC { $$ = ast_assign_cmd($1); }
-//  | ifexpr
-//  | whileexpr
-//  | PRINT PO STR PC SC { $$ = ast_print($3); }
-//  | READ PO ECOM VAR PC SC { $$ = ast_read($4); }
-//  ;
+cmdexpr: 
+  assignexpr SC { $$ = ast_assign_cmd($1); }
+  | ifexpr
+  | whileexpr
+  | PRINT PO STR PC SC { $$ = ast_print($3); }
+  | READ PO ECOM VAR PC SC { $$ = ast_read($4); }
+  ;
 
-//cmdlist: 
-//  cmdexpr { $$ = ast_list_cmd($1, NULL); }
-//  | cmdexpr cmdlist { $$ = ast_list_cmd($1, $2); }
-//  ;
+cmdlist: 
+  cmdexpr { $$ = ast_list_cmd($1, NULL); }
+  | cmdexpr cmdlist { $$ = ast_list_cmd($1, $2); }
+  ;
 
 %%
 void yyerror(const char* err) {

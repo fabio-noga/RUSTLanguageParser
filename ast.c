@@ -11,12 +11,12 @@ Expr* ast_integer(int v) {
   return node;
 }
 
-/*Expr* ast_variable(char* var) {
+Expr* ast_variable(char* var) {
   Expr* node = (Expr*)malloc(sizeof(Expr));
   node->kind = E_VARIABLE;
   node->attr.variable = strdup(var);
   return node;
-}*/
+}
 
 Expr* ast_operation(int operator, Expr* left, Expr* right) {
   Expr* node = (Expr*)malloc(sizeof(Expr));
@@ -28,7 +28,7 @@ Expr* ast_operation(int operator, Expr* left, Expr* right) {
 }
 
 
-/*BoolExpr* bool_ast_integer(int v) {
+BoolExpr* bool_ast_integer(int v) {
   BoolExpr* node = (BoolExpr*)malloc(sizeof(BoolExpr));
   node->kind = BOOLINT;
   node->attr.value = v;
@@ -105,4 +105,4 @@ CmdList* ast_list_cmd(Cmd* cmd, CmdList* next) {
   node->cmd = cmd;
   node->next = next;
   return node;
-}*/
+}

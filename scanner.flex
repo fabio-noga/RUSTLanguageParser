@@ -51,6 +51,9 @@ int yyline = 1;
 "fn" { return FUNC; }
 "main" { return MAIN; }
 
+"&&" { return AND; }
+"||" { return OR; }
+
 \-?[0-9]+ { 
    yylval.intValue = atoi(yytext);
    return INT; 
@@ -60,7 +63,6 @@ int yyline = 1;
    yylval.charValue = strdup(yytext);
    return VAR; 
 }
-
 \".*\" { 
 	yylval.charValue = strdup(yytext);
    return STR;  

@@ -21,9 +21,7 @@ Atom* atom_variable(char* var) {
 }
 
 Atom* atom_empty() {
-	Atom* a = (Atom*)malloc(sizeof(Atom));
-	a->kind = A_EMPTY;
-	return a;
+	return null;
 }
 
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
@@ -54,111 +52,13 @@ InstrList* nextInstrs(InstrList* list) {
 
 InstrList* append(InstrList* l1, InstrList* l2) {
 	InstrList* temp = l1;
-	while(l1->next != NULL) {
-		l1 = l1->next;
+	if(l1==NULL) return l2;
+	else if(l2==NULL) return l1;
+	while(temp->next != NULL) {
+		p=p->next;
 	}
-	l1->next = l2;
-	return temp;
-}
-
-
-void printAtom(Atom* ex) {
-	switch(ex->kind) {
-		case(A_STRING):
-			printf("%s", ex->u.name);
-			break;
-		case(A_INT):
-			printf("%d", ex->u.value);
-			break;
-		case(A_EMPTY):
-			printf("empty");
-			break;
-	}
-}
-
-void printInstrAux(Instr* instr) {
-	switch(instr->kind) {
-		case I_PLUS: case I_MINUS: case I_MULT: case I_DIV:
-			printAtom(instr->op.el1);
-			printf(",");
-			printAtom(instr->op.el2);
-			printf(",");
-			printAtom(instr->op.el3);
-			printf(",");
-			printAtom(instr->op.el4);
-			break;
-		case I_LABEL: case I_GOTO:
-			printAtom(instr->op.el1);
-			printf(",");
-			printAtom(instr->op.el2);
-			printf(",");
-			printAtom(instr->op.el3);
-			printf(",");
-			printAtom(instr->op.el4);
-			break;
-		case I_IFE: case I_IFDIF: case I_IFG: case I_IFL: case I_IFGE: case I_IFLE:
-			printAtom(instr->op.el1);
-			printf(",");
-			printAtom(instr->op.el2);
-			printf(",");
-			printf("l_true,l_false");
-			break;
-	}
-}
-
-void printInstr(Instr* instr) {
-	printf("(");
-	switch(instr->kind) {
-		case(I_PLUS):
-			printf("PLUS,");
-			break;
-		case(I_MINUS):
-			printf("MINUS,"); 
-			break;
-		case(I_MULT):
-			printf("MULT,");
-			break;
-		case(I_DIV):
-			printf("DIV,"); 
-			break;
-		case(I_ATRIB):
-			printf("ATRIB,"); 
-			break;
-		case(I_LABEL):
-			printf("LABEL,"); 
-			break;
-		case(I_GOTO):
-			printf("GOTO,"); 
-			break;
-		case(I_IFE):
-			printf("IFE,"); 
-			break;
-		case(I_IFDIF):
-			printf("IFDIF,"); 
-			break;
-		case(I_IFG):
-			printf("IFG,"); 
-			break;
-		case(I_IFL):
-			printf("IFL,"); 
-			break;
-		case(I_IFGE):
-			printf("IFGE,"); 
-			break;
-		case(I_IFLE):
-			printf("IFLE,"); 
-			break;
-	}
-
-	printInstrAux(instr);
-	printf(")\n");
-}
-
-void printInstrList(InstrList* list) {
-	printInstr(list->instr);
-	if(list->next != NULL) {
-		printInstrList(list->next);
-	}
+	p->next = l2;
+	return l1;
 }
 
 
@@ -169,22 +69,20 @@ char* newVar() {
 	return strdup(buffer);
 }
 
-int compileOp(int op) {
-	
-}
+
 
 InstrList* compileExpr(Expr* expr, char* reg) {
 	switch(expr->kind) {
 		case E_INTEGER:
-			char* reg = newVar();
+			char* reg1 = newVar();
 			InstrList* code = (InstrList*)malloc(sizeof(InstrList));
-			code = mk_instr_list(mk_instr(ATRIB, reg, expr->attr.value, Empty, Empty), NULL);
+			code = mk_instr_list(mk_instr(ATRIB, reg1, expr->attr.value, Empty, Empty), NULL);
 			return code;
 
 		case E_VARIABLE:
-			char* reg = newVar();
+			char* reg1 = newVar();
 			InstrList* code = (InstrList*)malloc(sizeof(InstrList));
-			code = mk_instr_list(mk_instr(ATRIB, reg, expr->attr.value, Empty, Empty), NULL);
+			code = mk_instr_list(mk_instr(ATRIB, reg1, expr->attr.value, Empty, Empty), NULL);
 			return code;
 
 		case E_OPERATION:
@@ -200,6 +98,6 @@ InstrList* compileExpr(Expr* expr, char* reg) {
 	}
 }
 
-int main() {
-	return 0;
-}
+
+
+

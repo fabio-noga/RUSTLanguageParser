@@ -59,7 +59,7 @@ Atom* atom_variable(char* name);
 Atom* atom_empty();
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
 InstrList* mk_instr_list(Instr* instr, InstrList* next);
-int mk_label(int label_id);
+Label* mk_label(int label_id);
 
 
 Instr* getFirst(InstrList* list);
@@ -74,7 +74,7 @@ void printInstrList(InstrList* list);
 
 
 char* newVar();
-Instr* compileOp(int op);
+Instr* compileOp(Expr* expr);
 InstrList* compileExpr(Expr* expr, char* reg);
 //InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse);
 

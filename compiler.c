@@ -12,7 +12,8 @@ FILE *fp;
 InstrList* compileCmd(Cmd* cmd){
 	switch(cmd->kind)
 	{
-		case ATRIB:
+		case C_ASSIGN:
+		printf("Atrib\n");
 			return compileExpr((cmd->type.assign.aexpr)->expr,(cmd->type.assign.aexpr)->var);
 			//return code;
 
@@ -32,6 +33,7 @@ InstrList* compileCmd(Cmd* cmd){
 
 
 InstrList* CompileCmdList(CmdList* CmdList) {
+	
 	if(CmdList!=NULL){
 		InstrList* list=compileCmd(CmdList->cmd);
 		return append(list,CompileCmdList(CmdList->next));
@@ -174,7 +176,9 @@ int main(int argc, char** argv) {
   }
   if (yyparse() == 0) {
     //InstrList* result = compileExpr(root);
-    printTemp(CompileCmdList(root));
+    printf(".text:\n");
+    CompileCmdList(root);
+    //printTemp(CompileCmdList(root));
     //printListMips(compileExpr);
   }
   return 0;

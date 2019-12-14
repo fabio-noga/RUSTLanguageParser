@@ -11,6 +11,10 @@ struct _Atom {
 	} u;
 };
 
+struct _Label {
+	int idlabel;
+};
+
 struct _Instr {
 	enum {
 		I_PLUS, 
@@ -47,6 +51,7 @@ struct _InstrList {
 typedef struct _Atom Atom;
 typedef struct _Instr Instr;
 typedef struct _InstrList InstrList;
+typedef struct _Label Label;
 
 
 Atom* atom_integer(int v);
@@ -54,6 +59,7 @@ Atom* atom_variable(char* name);
 Atom* atom_empty();
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
 InstrList* mk_instr_list(Instr* instr, InstrList* next);
+int mk_label(int label_id);
 
 
 Instr* getFirst(InstrList* list);
@@ -66,8 +72,10 @@ void printInstrAux(Instr* instr);
 void printInstr(Instr* instr);
 void printInstrList(InstrList* list);
 
-char* newVar();
-InstrList* compileExpr(Expr* e, char *r);
 
+char* newVar();
+Instr* compileOp(int op);
+InstrList* compileExpr(Expr* expr, char* reg);
+//InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse);
 
 #endif

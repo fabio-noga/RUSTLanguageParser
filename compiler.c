@@ -10,11 +10,12 @@ FILE *fp;
 
 
 InstrList* compileCmd(Cmd* cmd){
+    InstrList* code = (InstrList*)malloc(sizeof(InstrList));
 	switch(cmd->kind)
 	{
 		case C_ASSIGN:
-		printf("Atrib\n");
-			return compileExpr((cmd->type.assign.aexpr)->expr,(cmd->type.assign.aexpr)->var);
+			code=compileExpr((cmd->type.assign.aexpr)->expr,(cmd->type.assign.aexpr)->var);
+			return code;
 			//return code;
 
 
@@ -73,11 +74,11 @@ void printInstrAux(Instr* instr) {
 
 void printInstr(Instr* instr) {
 	printf("(");
-	switch(instr->kind) {
-		case(I_PLUS):
+	switch(instr->op.operator) {
+		case I_PLUS:
 			printf("PLUS,");
 			break;
-		case(I_MINUS):
+		case I_MINUS:
 			printf("MINUS,"); 
 			break;
 		case(I_MULT):
@@ -161,7 +162,7 @@ void printListMips(CmdList* list, int tabs){
 }
 void printTemp(InstrList* list){
 	printInstr(list->instr);
-	printTemp(list->next);
+	if(list->next!=NULL)printTemp(list->next);
 }
 
 
@@ -177,8 +178,8 @@ int main(int argc, char** argv) {
   if (yyparse() == 0) {
     //InstrList* result = compileExpr(root);
     printf(".text:\n");
-    CompileCmdList(root);
-    //printTemp(CompileCmdList(root));
+    //CompileCmdList(root);
+    printTemp(CompileCmdList(root));
     //printListMips(compileExpr);
   }
   return 0;

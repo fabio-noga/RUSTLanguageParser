@@ -121,6 +121,7 @@ boolexpr:
 assignexpr:
   LET VAR ATRIB expr { $$ = ast_assign_expr($2, $4); }
   | VAR ATRIB expr { $$ = ast_assign_expr($1, $3); }
+//  | LET VAR { $$ = ast_assign_expr($2,NULL); }
   ;
 
 ifexpr:

@@ -7,28 +7,28 @@
 
 int counter = 0;
 
-Atom *atom_integer(int v) {
-    Atom *a = (Atom *)malloc(sizeof(Atom));
+Atom* atom_integer(int v) {
+    Atom* a = (Atom*)malloc(sizeof(Atom));
     a->kind = A_INT;
     a->u.value = v;
     return a;
 }
 
-Atom *atom_variable(char *var) {
-    Atom *a = (Atom *)malloc(sizeof(Atom));
+Atom* atom_variable(char* var) {
+    Atom* a = (Atom*)malloc(sizeof(Atom));
     a->kind = A_STRING;
     a->u.name = strdup(var);
     return a;
 }
 
-Atom *atom_empty() {
-    Atom *a = (Atom *)malloc(sizeof(Atom));
+Atom* atom_empty() {
+    Atom* a = (Atom*)malloc(sizeof(Atom));
     a->kind = A_EMPTY;
     return a;
 }
 
-Instr *mk_instr(int operator, Atom *el1, Atom *el2, Atom *el3, Atom *el4) {
-    Instr *instr = (Instr *)malloc(sizeof(Instr));
+Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
+    Instr* instr = (Instr*)malloc(sizeof(Instr));
     instr->op.operator = operator;
     instr->op.el1 = el1;
     instr->op.el2 = el2;
@@ -37,30 +37,30 @@ Instr *mk_instr(int operator, Atom *el1, Atom *el2, Atom *el3, Atom *el4) {
     return instr;
 }
 
-InstrList *mk_instr_list(Instr *instr, InstrList *next) {
-    InstrList *list = (InstrList *)malloc(sizeof(InstrList));
+InstrList* mk_instr_list(Instr* instr, InstrList* next) {
+    InstrList* list = (InstrList*)malloc(sizeof(InstrList));
     list->instr = instr;
     list->next = next;
     return list;
 }
 
-Label *mk_label(int idlabel) {
-    Label *label = (Label *)malloc(sizeof(Label));
+Label* mk_label(int idlabel) {
+    Label* label = (Label*)malloc(sizeof(Label));
     label->idlabel = idlabel;
     return label;
 }
 
 
-Instr *getFirst(InstrList *list) {
+Instr* getFirst(InstrList* list) {
     return list->instr;
 }
 
-InstrList *nextInstrs(InstrList *list) {
+InstrList* nextInstrs(InstrList* list) {
     return list->next;
 }
 
-InstrList *append(InstrList *l1, InstrList *l2) {
-    InstrList *temp = l1;
+InstrList* append(InstrList* l1, InstrList* l2) {
+    InstrList* temp = l1;
     if(l1 == NULL)
         return l2;
     else if(l2 == NULL)
@@ -80,15 +80,19 @@ char* newVar() {
     return strdup(buffer);
 }
 
-Instr *compileOp(Expr *expr) {
-    Instr *instr = (Instr *)malloc(sizeof(Instr));
-    if(expr->kind == E_OPERATION) {
+Instr* compileOp(Expr* expr) {
+    Instr* instr = (Instr*)malloc(sizeof(Instr));
+    //if(expr->kind == E_OPERATION) {
         switch(expr->attr.op.operator) {
         case PLUS:
             instr->kind = I_PLUS;
+    		//instr=mk_instr(I_PLUS,atom_empty(),atom_empty(),atom_empty(),atom_empty());
+            //printf("plus\n");
             return instr;
         case MINUS:
             instr->kind = I_MINUS;
+            //instr=mk_instr(I_MINUS,atom_empty(),atom_empty(),atom_empty(),atom_empty());
+            //printf("minus\n");
             return instr;
         case MULT:
             instr->kind = I_MULT;
@@ -96,30 +100,65 @@ Instr *compileOp(Expr *expr) {
         case DIV:
             instr->kind = I_DIV;
             return instr;
+        /*case ATRIB:
+            instr->kind = I_ATRIB;
+            return instr;
+        case LABEL:
+            instr->kind = I_LABEL;
+            return instr;
+        case GOTO:
+            instr->kind = I_GOTO;
+            return instr;
+        case IFE:
+            instr->kind = I_EFE;
+            return instr;
+        case EFDIF:
+            instr->kind = I_IFDIF;
+            return instr;
+        case IFG:
+            instr->kind = I_IFG;
+            return instr;
+        case IFL:
+            instr->kind = I_IFL;
+            return instr;
+        case IFGE:
+            instr->kind = I_IFGE;
+            return instr;
+        case IFLE:
+            instr->kind = I_IFLE;
+            return instr;
+        case PRINT:
+            instr->kind = I_PRINT;
+            return instr;
+        case SCAN:
+            instr->kind = I_SCAN;
+            return instr;*/
         }
-    }
+    //}
 }
 
 InstrList* compileExpr(Expr* expr, char* reg) {
     InstrList* code = (InstrList*)malloc(sizeof(InstrList));
     switch(expr->kind) {
     case E_INTEGER:
-        code = mk_instr_list(mk_instr(ATRIB, atom_variable(reg), atom_integer(expr->attr.value), atom_empty(), atom_empty()), NULL);
+        code = mk_instr_list(mk_instr(I_ATRIB, atom_variable(reg), atom_integer(expr->attr.value), atom_empty(), atom_empty()), NULL);
         return code;
 
     case E_VARIABLE:
-        code = mk_instr_list(mk_instr(ATRIB, atom_variable(reg), atom_variable(expr->attr.variable), atom_empty(), atom_empty()), NULL);
+        code = mk_instr_list(mk_instr(I_ATRIB, atom_variable(reg), atom_variable(expr->attr.variable), atom_empty(), atom_empty()), NULL);
         return code;
 
-    case E_OPERATION:;
+    case E_OPERATION:
+        ;
         char* reg1 = newVar();
         char* reg2 = newVar();
-        InstrList *l1 = (InstrList *)malloc(sizeof(InstrList));
-        InstrList *l2 = (InstrList *)malloc(sizeof(InstrList));
+        InstrList* l1 = (InstrList*)malloc(sizeof(InstrList));
+        InstrList* l2 = (InstrList*)malloc(sizeof(InstrList));
         l1 = compileExpr(expr->attr.op.left, reg1);
         l2 = compileExpr(expr->attr.op.right, reg2);
-        InstrList *l3 = append(l1, l2);
-        InstrList *l4 = append(l3, mk_instr_list(mk_instr(compileOp(expr)->kind, atom_variable(reg), atom_variable(reg1), atom_variable(reg2), atom_empty()), NULL));
+        InstrList* l3 = append(l1, l2);
+        Instr* temp=compileOp(expr);
+        InstrList* l4 = append(l3, mk_instr_list(mk_instr(temp->kind, atom_variable(reg), atom_variable(reg1), atom_variable(reg2), atom_empty()), NULL));
         return l4;
     }
 }

@@ -10,11 +10,27 @@ FILE *fp;
 
 
 InstrList* compileCmd(Cmd* cmd){
-	if(cmd->kind==C_ASSIGN){
-		char *r;
-		return compileExpr(cmd->type.assign.aexpr,r);
+	switch(cmd->kind)
+	{
+		case ATRIB:
+			return compileExpr((cmd->type.assign.aexpr)->expr,(cmd->type.assign.aexpr)->var);
+			//return code;
+
+
+		/*case WHILE:
+			inicio = newLabel();
+			l_true = newLabel();
+			l_false = newLabel();
+			cond = compileBool(c->cond, l_true, l_false);
+			body = compileCmd(c->cmd);
+			code = [LABEL inicio] ++ cond ++ [LABEL l_true] ++ body ++ [GOTO inicio, LABEL l_false]
+	*/
 	}
 }
+
+
+
+
 InstrList* CompileCmdList(CmdList* CmdList) {
 	if(CmdList!=NULL){
 		InstrList* list=compileCmd(CmdList->cmd);
@@ -22,7 +38,6 @@ InstrList* CompileCmdList(CmdList* CmdList) {
 	}
 	return NULL;
 }
-
 
 void printInstrAux(Instr* instr) {
 	switch(instr->kind) {

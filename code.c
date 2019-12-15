@@ -5,7 +5,10 @@
 #include "code.h"
 #include "parser.h"
 
+int counter = 0;
+int counter1 = 0;
 int idlabel = 1;
+int sentinel=0;
 
 Atom* atom_integer(int v) {
     Atom* a = (Atom*)malloc(sizeof(Atom));
@@ -33,10 +36,9 @@ Atom* atom_label() {
     char lbuffer[20];
     sprintf(lbuffer, "L%d", idlabel);
     idlabel++;
-    a->u.name = lbuffer;
+    a->u.name=lbuffer;
     return atom_variable(strdup(lbuffer));
 }
-
 
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
     Instr* instr = (Instr*)malloc(sizeof(Instr));
@@ -54,6 +56,14 @@ InstrList* mk_instr_list(Instr* instr, InstrList* next) {
     list->next = next;
     return list;
 }
+
+Label* mk_label(int idlabel) {
+    Label* label = (Label*)malloc(sizeof(Label));
+    label->idlabel = idlabel;
+    return label;
+}
+
+
 
 
 Instr* getFirst(InstrList* list) {
@@ -78,112 +88,104 @@ InstrList* append(InstrList* l1, InstrList* l2) {
 }
 
 
-void printAtom(Atom* ex) {
-    switch(ex->kind) {
-        case(A_STRING):
-            printf("%s", ex->u.name);
-            break;
-        case(A_INT):
-            printf("%d", ex->u.value);
-            break;
-        case(A_EMPTY):
-            printf(" ");
-            break;
-        /*case(A_LABEL):
-            printf("%s",ex->)
-            break;*/
+char* newVar() {
+    char buffer[20];
+    sprintf(buffer, "$t%d", counter);
+    counter++;
+    return strdup(buffer);
+}
+
+char* newString() {
+    char buffer[20];
+    sprintf(buffer, "prompt%d", counter1);
+    counter1++;
+    return strdup(buffer);
+}
+Instr* compileBoolOp(BoolExpr* bexpr) {
+	Instr* instr = (Instr*)malloc(sizeof(Instr));
+	switch(bexpr->attr.boolop.operator) {
+		case EQ:
+            instr->kind = I_IFE;
+            return instr;
+        case DIFF:
+            instr->kind = I_IFDIF;
+            return instr;
+        case GREATER:
+            instr->kind = I_IFG;
+            return instr;
+        case LESS:
+            instr->kind = I_IFL;
+            return instr;
+        case GEQ:
+            instr->kind = I_IFGE;
+            return instr;
+        case LEQ:
+            instr->kind = I_IFLE;
+            return instr;
+	}
+}
+Instr* compileOp(Expr* expr) {
+    Instr* instr = (Instr*)malloc(sizeof(Instr));
+    //if(expr->kind == E_OPERATION) {
+        switch(expr->attr.op.operator) {
+        case PLUS:
+            instr->kind = I_PLUS;
+            return instr;
+        case MINUS:
+            instr->kind = I_MINUS;
+            return instr;
+        case MULT:
+            instr->kind = I_MULT;
+            return instr;
+        case DIV:
+            instr->kind = I_DIV;
+            return instr;
         }
+    //}
 }
 
-void printInstrAux(Instr* instr) {
-    switch(instr->kind) {
-        case I_PLUS:
-        case I_MINUS:
-        case I_MULT:
-        case I_DIV:
-            printAtom(instr->op.el1);
-            printf(",");
-            printAtom(instr->op.el2);
-            printf(",");
-            printAtom(instr->op.el3);
-            printf(",");
-            printAtom(instr->op.el4);
-            break;
-        case I_LABEL:
-        case I_GOTO:
-            printAtom(instr->op.el1);
-            printf(",");
-            printAtom(instr->op.el2);
-            printf(",");
-            printAtom(instr->op.el3);
-            printf(",");
-            printAtom(instr->op.el4);
-            break;
-        case I_IFE:
-        case I_IFDIF:
-        case I_IFG:
-        case I_IFL:
-        case I_IFGE:
-        case I_IFLE:
-            printAtom(instr->op.el1);
-            printf(",");
-            printAtom(instr->op.el2);
-            printf(",");
-            printf("l_true,l_false");
-            break;
+InstrList* compileBool(BoolExpr* bexpr, Atom* labelTrue, Atom* labelFalse) {
+	char* reg = newVar();
+	switch(bexpr->kind) {
+		case BOOLINT:
+			return mk_instr_list(mk_instr(I_ATRIB, atom_variable(reg), atom_integer(bexpr->attr.value), atom_empty(), atom_empty()), NULL);
+		case EXPR:
+			;
+			char* reg1 = newVar();
+	        char* reg2 = newVar();
+	        InstrList* l1 = compileExpr(bexpr->attr.boolop.left, reg1);
+	        InstrList* l2 = compileExpr(bexpr->attr.boolop.right, reg2);
+	        InstrList* l3 = append(l1, l2);
+	        return append(l3, mk_instr_list(mk_instr(compileBoolOp(bexpr)->kind, atom_variable(reg1), atom_variable(reg2), labelTrue, labelFalse), NULL));
+	}
+}
+
+InstrList* compileExpr(Expr* expr, char* reg) {
+    InstrList* code = (InstrList*)malloc(sizeof(InstrList));
+    switch(expr->kind) {
+    case E_INTEGER:
+        code = mk_instr_list(mk_instr(I_ATRIB, atom_variable(reg), atom_integer(expr->attr.value), atom_empty(), atom_empty()), NULL);
+        return code;
+
+    case E_VARIABLE:
+        code = mk_instr_list(mk_instr(I_ATRIB, atom_variable(reg), atom_variable(expr->attr.variable), atom_empty(), atom_empty()), NULL);
+        return code;
+
+    case E_OPERATION:
+        ;
+        char* reg1 = newVar();
+        char* reg2 = newVar();
+        InstrList* l1 = (InstrList*)malloc(sizeof(InstrList));
+        InstrList* l2 = (InstrList*)malloc(sizeof(InstrList));
+        l1 = compileExpr(expr->attr.op.left, reg1);
+        l2 = compileExpr(expr->attr.op.right, reg2);
+        InstrList* l3 = append(l1, l2);
+        Instr* temp=compileOp(expr);
+        InstrList* l4 = append(l3, mk_instr_list(mk_instr(temp->kind, atom_variable(reg), atom_variable(reg1), atom_variable(reg2), atom_empty()), NULL));
+        return l4;
     }
 }
 
-void printInstr(Instr* instr) {
-    printf("(");
-    switch(instr->op.operator) {
-        case I_PLUS:
-            printf("PLUS,");
-            break;
-        case I_MINUS:
-            printf("MINUS,");
-            break;
-        case(I_MULT):
-            printf("MULT,");
-            break;
-        case(I_DIV):
-            printf("DIV,");
-            break;
-        case(I_ATRIB):
-            printf("ATRIB,");
-            break;
-        case(I_LABEL):
-            printf("LABEL,");
-            break;
-        case(I_GOTO):
-            printf("GOTO,");
-            break;
-        case(I_IFE):
-            printf("IFE,");
-            break;
-        case(I_IFDIF):
-            printf("IFDIF,");
-            break;
-        case(I_IFG):
-            printf("IFG,");
-            break;
-        case(I_IFL):
-            printf("IFL,");
-            break;
-        case(I_IFGE):
-            printf("IFGE,");
-            break;
-        case(I_IFLE):
-            printf("IFLE,");
-            break;
-    }
-    printInstrAux(instr);
-    printf(")\n");
-}
+/*InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse) {
 
-void printInstrList(InstrList* list) {
-    printInstr(list->instr);
-    if(list->next != NULL) {
-        printInstrList(list->next);
-    }
-}
+}*/

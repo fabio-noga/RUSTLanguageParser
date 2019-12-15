@@ -1,7 +1,6 @@
 #ifndef __code_h__
 #define __code_h__
 
-//Estruturas e respetivos construtores, funções de manipulação e printers
 struct _Atom {
 	enum {
 		A_INT, A_STRING, A_EMPTY, A_LABEL
@@ -10,6 +9,10 @@ struct _Atom {
 		int value;
 		char* name;
 	} u;
+};
+
+struct _Label {
+	int idlabel;
 };
 
 struct _Instr {
@@ -57,6 +60,7 @@ Atom* atom_empty();
 Atom* atom_label();
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
 InstrList* mk_instr_list(Instr* instr, InstrList* next);
+Label* mk_label(int label_id);
 
 
 Instr* getFirst(InstrList* list);
@@ -68,5 +72,16 @@ void printAtom(Atom* ex);
 void printInstrAux(Instr* instr);
 void printInstr(Instr* instr);
 void printInstrList(InstrList* list);
+
+
+char* newVar();
+char* newString();
+Instr* compileOp(Expr* expr);
+InstrList* compileExpr(Expr* expr, char* reg);
+InstrList* compileBool(BoolExpr* bexpr, Atom* labelTrue, Atom* labelFalse);
+
+Instr* compileBoolOp(BoolExpr* bexpr);
+//InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse);
+
 
 #endif

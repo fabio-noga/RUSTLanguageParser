@@ -138,6 +138,7 @@ cmdexpr:
   | ifexpr
   | whileexpr
   | PRINT PO STR PC SC { $$ = ast_print($3); }
+  | PRINT PO VAR PC SC { $$ = ast_print($3); }
   | READ PO ECOM VAR PC SC { $$ = ast_read($4); }
   ;
 

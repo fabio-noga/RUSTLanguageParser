@@ -1,0 +1,32 @@
+.data
+  prompt0: .asciiz "Nope"
+  prompt1: .asciiz "fim"
+.text
+main:
+L1:
+  lw $t0 a
+  lw $t1 b
+  beq $t0 $t1 L2
+  lw $t2 a
+  li $t3 1
+  bne $t2 $t3 L3
+  lw $t4 a
+  li $t5 1
+  add $t4 $t4 $t5
+  sw a $t4
+  li $v0, 4
+  la $a0, a
+  syscall
+  j L4
+L3:
+  li $v0, 4
+  la $a0, prompt0
+  syscall
+L4:
+  j L1
+L2:
+  li $v0, 4
+  la $a0, prompt1
+  syscall
+  li $v0, 10
+  syscall

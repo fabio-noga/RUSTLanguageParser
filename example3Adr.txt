@@ -1,0 +1,25 @@
+LAB L1
+$t0 := a;
+LAB $t0
+$t1 := b;
+LAB $t1
+IF $t0 DIF $t1 THEN   ELSE L2
+$t2 := a;
+LAB $t2
+$t3 := 1;
+LAB $t3
+IF $t2 EQUAL $t3 THEN L4 ELSE L3
+$t4 := a;
+LAB $t4
+$t5 := 1;
+LAB $t5
+a := $t4 PLUS $t5;
+PRINT a
+GOTO L4
+LAB L3
+PRINT "Nope"
+LAB L4
+GOTO L1
+LAB L2
+PRINT "fim"
+EXIT

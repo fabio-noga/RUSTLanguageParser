@@ -1,5 +1,6 @@
 #ifndef __code_h__
 #define __code_h__
+#include <ctype.h>
 
 struct _Atom {
 	enum {
@@ -81,6 +82,9 @@ InstrList* compileExpr(Expr* expr, char* reg);
 InstrList* compileBool(BoolExpr* bexpr, Atom* labelTrue, Atom* labelFalse);
 
 Instr* compileBoolOp(BoolExpr* bexpr);
+InstrList* compileCmd(Cmd* cmd);
+InstrList* CompileCmdList(CmdList* CmdList);
+InstrList* data;
 //InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse);
 
 

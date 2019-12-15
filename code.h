@@ -3,7 +3,7 @@
 
 struct _Atom {
 	enum {
-		A_INT, A_STRING, A_EMPTY
+		A_INT, A_STRING, A_EMPTY, A_LABEL
 	} kind;
 	union {
 		int value;
@@ -57,6 +57,7 @@ typedef struct _Label Label;
 Atom* atom_integer(int v);
 Atom* atom_variable(char* name);
 Atom* atom_empty();
+Atom* atom_label();
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
 InstrList* mk_instr_list(Instr* instr, InstrList* next);
 Label* mk_label(int label_id);
@@ -76,6 +77,10 @@ void printInstrList(InstrList* list);
 char* newVar();
 Instr* compileOp(Expr* expr);
 InstrList* compileExpr(Expr* expr, char* reg);
+InstrList* compileBool(BoolExpr* bexpr, Atom* labelTrue, Atom* labelFalse);
+
+Instr* compileBoolOp(BoolExpr* bexpr);
 //InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse);
+
 
 #endif

@@ -6,6 +6,7 @@
 #include "parser.h"
 
 int counter = 0;
+int idlabel = 1;
 
 Atom* atom_integer(int v) {
     Atom* a = (Atom*)malloc(sizeof(Atom));
@@ -25,6 +26,16 @@ Atom* atom_empty() {
     Atom* a = (Atom*)malloc(sizeof(Atom));
     a->kind = A_EMPTY;
     return a;
+}
+
+Atom* atom_label() {
+    Atom* a = (Atom*)malloc(sizeof(Atom));
+    a->kind = A_LABEL;
+    char lbuffer[20];
+    sprintf(lbuffer, "L%d", idlabel);
+    idlabel++;
+    a->u.name=lbuffer;
+    return atom_variable(strdup(lbuffer));
 }
 
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4) {
@@ -51,6 +62,8 @@ Label* mk_label(int idlabel) {
 }
 
 
+
+
 Instr* getFirst(InstrList* list) {
     return list->instr;
 }
@@ -75,11 +88,33 @@ InstrList* append(InstrList* l1, InstrList* l2) {
 
 char* newVar() {
     char buffer[20];
-    sprintf(buffer, "t%d", counter);
+    sprintf(buffer, "$t%d", counter);
     counter++;
     return strdup(buffer);
 }
-
+Instr* compileBoolOp(BoolExpr* bexpr) {
+	Instr* instr = (Instr*)malloc(sizeof(Instr));
+	switch(bexpr->attr.boolop.operator) {
+		case EQ:
+            instr->kind = I_IFE;
+            return instr;
+        case DIFF:
+            instr->kind = I_IFDIF;
+            return instr;
+        case GREATER:
+            instr->kind = I_IFG;
+            return instr;
+        case LESS:
+            instr->kind = I_IFL;
+            return instr;
+        case GEQ:
+            instr->kind = I_IFGE;
+            return instr;
+        case LEQ:
+            instr->kind = I_IFLE;
+            return instr;
+	}
+}
 Instr* compileOp(Expr* expr) {
     Instr* instr = (Instr*)malloc(sizeof(Instr));
     //if(expr->kind == E_OPERATION) {
@@ -135,6 +170,22 @@ Instr* compileOp(Expr* expr) {
             return instr;*/
         }
     //}
+}
+
+InstrList* compileBool(BoolExpr* bexpr, Atom* labelTrue, Atom* labelFalse) {
+	char* reg = newVar();
+	switch(bexpr->kind) {
+		case BOOLINT:
+			return mk_instr_list(mk_instr(I_ATRIB, atom_variable(reg), atom_integer(bexpr->attr.value), atom_empty(), atom_empty()), NULL);
+		case EXPR:
+			;
+			char* reg1 = newVar();
+	        char* reg2 = newVar();
+	        InstrList* l1 = compileExpr(bexpr->attr.boolop.left, reg1);
+	        InstrList* l2 = compileExpr(bexpr->attr.boolop.right, reg2);
+	        InstrList* l3 = append(l1, l2);
+	        return append(l3, mk_instr_list(mk_instr(compileBoolOp(bexpr)->kind, atom_variable(reg1), atom_variable(reg2), labelTrue, labelFalse), NULL));
+	}
 }
 
 InstrList* compileExpr(Expr* expr, char* reg) {

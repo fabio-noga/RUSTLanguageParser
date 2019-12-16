@@ -1,6 +1,5 @@
 #ifndef __code_h__
 #define __code_h__
-#include <ctype.h>
 
 struct _Atom {
 	enum {
@@ -10,10 +9,6 @@ struct _Atom {
 		int value;
 		char* name;
 	} u;
-};
-
-struct _Label {
-	int idlabel;
 };
 
 struct _Instr {
@@ -61,31 +56,10 @@ Atom* atom_empty();
 Atom* atom_label();
 Instr* mk_instr(int operator, Atom* el1, Atom* el2, Atom* el3, Atom* el4);
 InstrList* mk_instr_list(Instr* instr, InstrList* next);
-Label* mk_label(int label_id);
 
 
 Instr* getFirst(InstrList* list);
 InstrList* nextInstrs(InstrList* list);
 InstrList* append(InstrList* l1, InstrList* l2);
-
-
-void printAtom(Atom* ex);
-void printInstrAux(Instr* instr);
-void printInstr(Instr* instr);
-void printInstrList(InstrList* list);
-
-
-char* newVar();
-char* newString();
-Instr* compileOp(Expr* expr);
-InstrList* compileExpr(Expr* expr, char* reg);
-InstrList* compileBool(BoolExpr* bexpr, Atom* labelTrue, Atom* labelFalse);
-
-Instr* compileBoolOp(BoolExpr* bexpr);
-InstrList* compileCmd(Cmd* cmd);
-InstrList* CompileCmdList(CmdList* CmdList);
-InstrList* data;
-//InstrList* compileBool(BoolExpr bexpr, Label* labelTrue, Label* labelFalse);
-
 
 #endif

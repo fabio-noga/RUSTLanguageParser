@@ -30,5 +30,5 @@ The parser then parses the program for the given RUST code, and outputs a repres
 
 ```
 $  make
-$  ./compiler [exemplo.txt]
+$  ./compiler [exemple.txt]
 ```
